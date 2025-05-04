@@ -2,6 +2,7 @@
 #include <string.h>
 
 bool Server::Signal = false;
+
 void Server::SignalHandler(int signum)
 {
 	(void)signum;
@@ -79,22 +80,36 @@ void Server::AcceptIncomingClient()
 
 void	Server::nick(const int& fd, const std::vector<std::string>& input)
 {
+	if (getClient(fd)->isAllowed() == false)
+	{
+		std::cout << "You have to enter the password first";
+		return;
+	}
 	if (input.size() == 1)
 		return;
-	std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
+	std::vector<Client>::iterator client = getClient(fd); 
 	if (client != clients.end())
+	{
 		client->setNick(input[1]);
-	std::cout << "Nick name set to " << input[1] << std::endl;
+		std::cout << "Nick name set to " << input[1] << std::endl;
+	}
 }
 
 void	Server::user(const int& fd, const std::vector<std::string>& input)
 {
+	if (getClient(fd)->isAllowed() == false)
+	{
+		std::cout << "You have to enter the password first";
+		return;
+	}
 	if (input.size() == 1)
 		return;
-	std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
+	std::vector<Client>::iterator client = getClient(fd);
 	if (client != clients.end())
+	{
 		client->setUser(input[1]);
-	std::cout << "User name set to " << input[1] << std::endl;
+		std::cout << "User name set to " << input[1] << std::endl;
+	}
 }
 
 void	Server::pass(const int& fd, const std::vector<std::string>& input)
@@ -105,12 +120,25 @@ void	Server::pass(const int& fd, const std::vector<std::string>& input)
 	if (strcmp(input[1].c_str(), Mdp))
 		std::cout << "Wrong password" << std::endl;
 	else
+	{
 		std::cout << "Good password" << std::endl;
+		getClient(fd)->setAuthorization(true);
+	}
 }
 
 void	Server::quit(const int& fd)
 {
 	ClearClients(fd);
+}
+
+void	Server::join(const int& fd, const std::vector<std::string>& input)
+{
+	(void)input;
+	if (getClient(fd)->isAllowed() == false)
+	{
+		std::cout << "You have to enter the password first";
+		return;
+	}
 }
 
 void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
@@ -127,6 +155,8 @@ void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 		user(fd, input);
 	else if (cmd == "/QUIT")
 		quit(fd);
+	else if (cmd == "/JOIN")
+		join(fd, input);
 }
 
 int Server::ParseData(int fd, char *buff)
@@ -137,9 +167,9 @@ int Server::ParseData(int fd, char *buff)
 	{
 		const std::string nick = std::find(clients.begin(), clients.end(), fd)->getNick();
 		if (nick.empty())
-			std::cout << BWHITE << "<@" << std::find(clients.begin(), clients.end(), fd)->getFd() << "> " << RESET;
+			std::cout << BWHITE << "< " << std::find(clients.begin(), clients.end(), fd)->getFd() << "> " << RESET;
 		else
-			std::cout << BWHITE << "<@" << nick << "> " << RESET;
+			std::cout << BWHITE << "< " << nick << "> " << RESET;
 		std::cout << buff;
 	}
 	return (0);

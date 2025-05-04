@@ -16,8 +16,7 @@
 #include <cctype>
 #include "Clients.hpp"
 #include "Colors.h"
-#include "tools.hpp"
-
+#include "Channels.hpp"
 class	Server
 {
 	private:
@@ -27,6 +26,7 @@ class	Server
 		char *Mdp;
 		std::vector<Client> clients;
 		std::vector<struct pollfd> fds;
+		std::vector<Channel>	_channels;
 
 	public:
 		Server() { ServSocket = -1; }
@@ -43,9 +43,12 @@ class	Server
 		void	user(const int& fd, const std::vector<std::string>& input);
 		void	quit(const int& fd);
 		void	pass(const int& fd, const std::vector<std::string>& input);
+		void	join(const int& fd, const std::vector<std::string>& input);
 
 		static void SignalHandler(int signum);
 	
 		void CloseFds();
 		void ClearClients(int fd);
+
+		std::vector<Client>::iterator	getClient(const int& fd) { return std::find(clients.begin(), clients.end(), fd); }
 };
