@@ -39,6 +39,10 @@ class	Server
 		int	ParseData(int fd, char *buff);
 		void HandleCmd(int fd, std::string str, int i, char *buffer);
 		void	handleCmd(const int& fd, const std::vector<std::string>& input);
+		void	nick(const int& fd, const std::vector<std::string>& input);
+		void	user(const int& fd, const std::vector<std::string>& input);
+		void	quit(const int& fd);
+		void	pass(const int& fd, const std::vector<std::string>& input);
 
 		static void SignalHandler(int signum);
 	

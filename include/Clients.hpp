@@ -5,8 +5,8 @@
 class Client
 {
 	private:
-		std::string		nick;
-		std::string		user;
+		std::string		_nick;
+		std::string		_user;
 		bool			connected;
 		bool			admin;
 		int			Fd;
@@ -16,15 +16,15 @@ class Client
 					Client(const int& fd, const in_addr& sin_addr) : connected(false), admin(false), Fd(fd), IPadd(inet_ntoa(sin_addr)) {}
 
 		const int& 		getFd(void) const { return Fd; }
-		const std::string&	getNick(void) const { return nick; }
-		const std::string&	getUser(void) const { return user; }
+		const std::string&	getNick(void) const { return _nick; }
+		const std::string&	getUser(void) const { return _user; }
 
 		const bool&		isConnected(void) const { return connected; }
 		const bool&		isAdmin(void) const { return admin; }
 
 		void			setFd(int fd){Fd = fd;}
-		void			setNick(std::string nick) { nick = nick; }
-		void			setUser(std::string user) { user = user; }
+		void			setNick(const std::string& nick) { _nick = nick; }
+		void			setUser(const std::string& user) { _user = user; }
 		void			setIpAdd(std::string ipadd) { IPadd = ipadd; }
 
 		bool 			operator==(const Client& client) const { return Fd == client.Fd; }

@@ -9,7 +9,8 @@ void Server::SignalHandler(int signum)
 	Server::Signal = true;
 }
 
-void Server::CloseFds(){
+void Server::CloseFds()
+{
 	for(size_t i = 0; i < clients.size(); i++)
 	{
 		std::cout << RED << "Client <" << this->clients[i].getFd() << "> Disconnected" << WHITE << std::endl;
@@ -76,6 +77,42 @@ void Server::AcceptIncomingClient()
 	std::cout << GREEN << "Client <" << incofd << "> Connected" << WHITE << std::endl;
 }
 
+void	Server::nick(const int& fd, const std::vector<std::string>& input)
+{
+	if (input.size() == 1)
+		return;
+	std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
+	if (client != clients.end())
+		client->setNick(input[1]);
+	std::cout << "Nick name set to " << input[1] << std::endl;
+}
+
+void	Server::user(const int& fd, const std::vector<std::string>& input)
+{
+	if (input.size() == 1)
+		return;
+	std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
+	if (client != clients.end())
+		client->setUser(input[1]);
+	std::cout << "User name set to " << input[1] << std::endl;
+}
+
+void	Server::pass(const int& fd, const std::vector<std::string>& input)
+{
+	if (input.size() == 1)
+		return;
+	(void)fd;
+	if (strcmp(input[1].c_str(), Mdp))
+		std::cout << "Wrong password" << std::endl;
+	else
+		std::cout << "Good password" << std::endl;
+}
+
+void	Server::quit(const int& fd)
+{
+	ClearClients(fd);
+}
+
 void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 {
 	std::string cmd = input[0];
@@ -83,83 +120,28 @@ void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 	if (cmd == "/CAP")
 		return;
 	else if (cmd == "/PASS")
-	{
-		if (strcmp(input[1].c_str(), Mdp))
-			std::cout << "Wrong password" << std::endl;
-		else
-			std::cout << "Good password" << std::endl;
-	}
+		pass(fd, input);
 	else if (cmd == "/NICK")
-	{
-		std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
-		if (client != clients.end())
-			client->setNick(input[1]);
-		std::cout << "Nick name set to " << input[1] << std::endl;
-	}
+		nick(fd, input);
 	else if (cmd == "/USER")
-	{
-		std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
-		if (client != clients.end())
-			client->setUser(input[1]);
-		std::cout << "User name set to " << input[1] << std::endl;
-	}
+		user(fd, input);
 	else if (cmd == "/QUIT")
-		ClearClients(fd);
-	else
-		std::cout << "Command unknown" << std::endl;
-}
-
-void	Server::HandleCmd(int fd, std::string str, int i, char *buff)
-{
-	if (str == "CAP")
-		return ;
-	else if (str == "PASS")
-	{
-		std::string arg;
-		while (buff[i] != ' ' && buff[i] != '\n' && buff[i] != '\0')
-		{
-			arg += buff[i];
-			i++;
-		}
-		arg[strlen(arg.c_str()) - 1] = '\0';
-		if (strcmp((const char *)arg.c_str(), (const char *)this->Mdp))
-			std::cout << "Wrong password" << std::endl;
-	}
-	else if (str == "NICK")
-	{
-		std::string arg;
-		while (buff[i] != '\n' && buff[i] != '\0')
-		{
-			arg += buff[i];
-			i++;
-		}
-		std::cout << arg << std::endl;
-		std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
-		if (client != clients.end())
-			client->setNick(arg);
-	}
-	else if (str == "USER")
-	{
-		std::string arg;
-		while (buff[i] != '\n' && buff[i] != '\0')
-		{
-			arg += buff[i];
-			i++;
-		}
-		std::cout << arg << std::endl;
-		std::vector<Client>::iterator client = std::find(clients.begin(), clients.end(), fd);
-		if (client != clients.end())
-			client->setUser(arg);
-	}
-	else if (str == "/QUIT")
-		ClearClients(fd);
+		quit(fd);
 }
 
 int Server::ParseData(int fd, char *buff)
 {
-	std::string str;
-	std::cout << BLUE << std::find(clients.begin(), clients.end(), fd)->getNick() << RESET << buff;
-	handleCmd(fd, splitInput(buff));
+	if (buff[0] == '/')
+		handleCmd(fd, splitInput(buff));
+	else
+	{
+		const std::string nick = std::find(clients.begin(), clients.end(), fd)->getNick();
+		if (nick.empty())
+			std::cout << BWHITE << "<@" << std::find(clients.begin(), clients.end(), fd)->getFd() << "> " << RESET;
+		else
+			std::cout << BWHITE << "<@" << nick << "> " << RESET;
+		std::cout << buff;
+	}
 	return (0);
 }
 
