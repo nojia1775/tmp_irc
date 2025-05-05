@@ -14,6 +14,8 @@
 #include <vector>
 #include <poll.h>
 #include <cctype>
+#include <cstring>
+#include <cstdlib>
 #include "Clients.hpp"
 #include "Colors.h"
 #include "tools.hpp"
@@ -23,15 +25,20 @@ class	Channel
 	private:
 		std::vector<Client>	_clients;
 		std::string		_name;
+		std::vector<pollfd>	_pollfds;
 
 	public:
-					Channel(const std::string& name) : _name(name) {}
+					Channel(Client& client, const std::string& name);
 					~Channel(void) {}
-					Channel(const Channel& channel) : _name(channel._name) {}
+					Channel(const Channel& channel) : _clients(channel._clients), _name(channel._name) {}
 
 		Channel&		operator=(const Channel& channel) { (void)channel; return *this; }
+		bool			operator==(const std::string& name) const { return _name == name ? true : false; }
+		bool			operator!=(const std::string& name) const { return _name != name ? true : false; }
 
 		const std::string&	getName(void) const { return _name; }
 
 		void			setName(const std::string& name) { _name = name; }
+
+		void			sendMessage(const char *message) const;
 };

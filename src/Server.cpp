@@ -82,7 +82,7 @@ void	Server::nick(const int& fd, const std::vector<std::string>& input)
 {
 	if (getClient(fd)->isAllowed() == false)
 	{
-		std::cout << "You have to enter the password first";
+		std::cout << "You have to enter the password first" << std::endl;
 		return;
 	}
 	if (input.size() == 1)
@@ -99,7 +99,7 @@ void	Server::user(const int& fd, const std::vector<std::string>& input)
 {
 	if (getClient(fd)->isAllowed() == false)
 	{
-		std::cout << "You have to enter the password first";
+		std::cout << "You have to enter the password first" << std::endl;
 		return;
 	}
 	if (input.size() == 1)
@@ -159,19 +159,31 @@ void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 		join(fd, input);
 }
 
+const char	*Server::constructMessage(const int& fd, const char *buff)
+{
+	std::string message;
+	message += '<';
+	getClient(fd)->isAdmin() ? message += '@' : message += ' ';
+	getClient(fd)->getNick().empty() ? message += getClient(fd)->getFd() : message += getClient(fd)->getNick();
+	message += "> ";
+	for (size_t i = 0 ; i < strlen(buff) ; i++)
+		message += buff[i];
+	return message.c_str();
+}
+
+void	Server::broadcastToChannel(const int& fd, const char *message)
+{
+	std::vector<Channel>::iterator channel = getChannel(getClient(fd)->getChannel());
+	if (channel != _channels.end())
+		channel->sendMessage(message);
+}
+
 int Server::ParseData(int fd, char *buff)
 {
 	if (buff[0] == '/')
 		handleCmd(fd, splitInput(buff));
 	else
-	{
-		const std::string nick = std::find(clients.begin(), clients.end(), fd)->getNick();
-		if (nick.empty())
-			std::cout << BWHITE << "< " << std::find(clients.begin(), clients.end(), fd)->getFd() << "> " << RESET;
-		else
-			std::cout << BWHITE << "< " << nick << "> " << RESET;
-		std::cout << buff;
-	}
+		broadcastToChannel(fd, constructMessage(fd, buff));
 	return (0);
 }
 
@@ -214,7 +226,7 @@ void Server::ServerInit(int port, char *mdp)
 	SerSocket();
 
 	std::cout << GREEN << "Server <" << this->ServSocket << "> Connected" << WHITE << std::endl;
-	std::cout << "Waiting to accept a connection...\n";
+	std::cout << "Waiting to accept a connection..." << std::endl;
 
 	while (Server::Signal == false)
 	{

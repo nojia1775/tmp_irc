@@ -5,7 +5,8 @@ CXXFLAGS = -Wall -Wextra -Werror -g -MMD -std=c++98
 OBJS_DIR = obj
 
 SRCS =	src/Server.cpp \
-	src/main.cpp
+	src/main.cpp \
+	src/Channel.cpp
 
 DEPS = $(OBJS:.o=.d)
 

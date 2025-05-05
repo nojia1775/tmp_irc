@@ -14,9 +14,11 @@
 #include <vector>
 #include <poll.h>
 #include <cctype>
+#include <cstdlib>
 #include "Clients.hpp"
 #include "Colors.h"
-#include "Channels.hpp"
+#include "Channel.hpp"
+
 class	Server
 {
 	private:
@@ -32,23 +34,26 @@ class	Server
 		Server() { ServSocket = -1; }
 		~Server(void) { CloseFds(); }
 
+		std::vector<Client>::iterator	getClient(const int& fd) { return std::find(clients.begin(), clients.end(), fd); }
+		std::vector<Channel>::iterator	getChannel(const std::string& channel) { return std::find(_channels.begin(), _channels.end(), channel); }
+
 		void ServerInit(int port, char *mdp);
 		void SerSocket();
 		void AcceptIncomingClient();
 		void ReceiveDataClient(int fd);
 		int	ParseData(int fd, char *buff);
-		void HandleCmd(int fd, std::string str, int i, char *buffer);
 		void	handleCmd(const int& fd, const std::vector<std::string>& input);
 		void	nick(const int& fd, const std::vector<std::string>& input);
 		void	user(const int& fd, const std::vector<std::string>& input);
 		void	quit(const int& fd);
 		void	pass(const int& fd, const std::vector<std::string>& input);
 		void	join(const int& fd, const std::vector<std::string>& input);
+		const char *constructMessage(const int& fd, const char *buff);
+		void broadcastToChannel(const int& fd, const char *message);
 
 		static void SignalHandler(int signum);
 	
 		void CloseFds();
 		void ClearClients(int fd);
 
-		std::vector<Client>::iterator	getClient(const int& fd) { return std::find(clients.begin(), clients.end(), fd); }
 };
