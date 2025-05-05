@@ -13,10 +13,10 @@ Channel::Channel(Client& client, const std::string& name) : _name(name)
 	_pollfds.push_back(clientFd);
 }
 
-void	Channel::sendMessage(const char *message) const
+void	Channel::sendMessage(const std::string& message) const
 {
 	for (size_t i = 0 ; i < _clients.size() ; i++)
-		send(_clients[i].getFd(), message, strlen(message), 0);
+		send(_clients[i].getFd(), message.c_str(), strlen(message.c_str()), 0);
 }
 
 void	Channel::join(Client& client)

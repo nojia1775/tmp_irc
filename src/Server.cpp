@@ -188,7 +188,7 @@ void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 		part(fd);
 }
 
-const char	*Server::constructMessage(const int& fd, const char *buff)
+std::string	Server::constructMessage(const int& fd, const char *buff)
 {
 	std::string message;
 	message += '<';
@@ -197,10 +197,10 @@ const char	*Server::constructMessage(const int& fd, const char *buff)
 	message += "> ";
 	for (size_t i = 0 ; i < strlen(buff) ; i++)
 		message += buff[i];
-	return message.c_str();
+	return message;
 }
 
-void	Server::broadcastToChannel(const int& fd, const char *message)
+void	Server::broadcastToChannel(const int& fd, const std::string& message)
 {
 	std::vector<Channel>::iterator channel = getChannel(getClient(fd)->getChannel());
 	if (channel != _channels.end())
@@ -212,10 +212,7 @@ int Server::ParseData(int fd, char *buff)
 	if (buff[0] == '/')
 		handleCmd(fd, splitInput(buff));
 	else
-	{
-		send(fd, constructMessage(fd, buff), strlen(constructMessage(fd, buff)), 0);
 		broadcastToChannel(fd, constructMessage(fd, buff));
-	}
 	return (0);
 }
 

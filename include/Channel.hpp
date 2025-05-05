@@ -43,7 +43,7 @@ class	Channel
 
 		void				setName(const std::string& name) { _name = name; }
 
-		void				sendMessage(const char *message) const;
+		void				sendMessage(const std::string& message) const;
 		void				join(Client& client);
 		void				deleteClient(const int& fd);
 };

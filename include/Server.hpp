@@ -49,8 +49,8 @@ class	Server
 		void	pass(const int& fd, const std::vector<std::string>& input);
 		void	join(const int& fd, const std::vector<std::string>& input);
 		void	part(const int& fd);
-		const char *constructMessage(const int& fd, const char *buff);
-		void broadcastToChannel(const int& fd, const char *message);
+		std::string	constructMessage(const int& fd, const char *buff);
+		void broadcastToChannel(const int& fd, const std::string& message);
 
 		static void SignalHandler(int signum);
 	
