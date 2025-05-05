@@ -20,7 +20,7 @@ class Client
 		const int& 		getFd(void) const { return Fd; }
 		const std::string&	getNick(void) const { return _nick; }
 		const std::string&	getUser(void) const { return _user; }
-		const std::string&	getChannel(void) const { return _channel; }
+		std::string&		getChannel(void) { return _channel; }
 
 		const bool&		isConnected(void) const { return connected; }
 		const bool&		isAdmin(void) const { return _admin; }

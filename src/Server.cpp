@@ -116,7 +116,6 @@ void	Server::pass(const int& fd, const std::vector<std::string>& input)
 {
 	if (input.size() == 1)
 		return;
-	(void)fd;
 	if (strcmp(input[1].c_str(), Mdp))
 		std::cout << "Wrong password" << std::endl;
 	else
@@ -149,9 +148,24 @@ void	Server::join(const int& fd, const std::vector<std::string>& input)
 	else
 	{
 		getClient(fd)->setChannel(input[1]);
+		if (std::find(getChannel(input[1])->getAdmins().begin(), getChannel(input[1])->getAdmins().end(), fd) != getChannel(input[1])->getAdmins().end())
+			getClient(fd)->setAdmin(true);
 		getChannel(input[1])->join(*getClient(fd));
 		std::cout << "Connected to channel " << input[1] << "!" << std::endl;
 	}
+}
+
+void	Server::part(const int& fd)
+{
+	if (getClient(fd)->isAllowed() == false)
+	{
+		std::cout << "You have to enter the password first" << std::endl;
+		return;
+	}
+	if (getClient(fd)->getChannel().empty())
+		return;
+	getChannel(getClient(fd)->getChannel())->deleteClient(fd);
+	getClient(fd)->setAdmin(false);
 }
 
 void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
@@ -170,6 +184,8 @@ void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
 		quit(fd);
 	else if (cmd == "/JOIN")
 		join(fd, input);
+	else if (cmd == "/PART")
+		part(fd);
 }
 
 const char	*Server::constructMessage(const int& fd, const char *buff)
@@ -270,7 +286,7 @@ void Server::ClearClients(int fd)
 	{
 		if (this->fds[i].fd == fd)
 		{
-			this->fds.erase(this->fds.begin() + i); 
+			this->fds.erase(this->fds.begin() + i);
 			break;
 		}
 	}
