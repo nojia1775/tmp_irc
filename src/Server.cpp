@@ -73,7 +73,8 @@ void Server::AcceptIncomingClient()
 	NewPoll.events = POLLIN;
 	NewPoll.revents = 0;
 
-	this->clients.push_back(Client(incofd, cliadd.sin_addr));
+	Client client(incofd, cliadd.sin_addr);
+	this->clients.push_back(client);
 	this->fds.push_back(NewPoll);
 	std::cout << GREEN << "Client <" << incofd << "> Connected" << WHITE << std::endl;
 }
@@ -165,7 +166,6 @@ void	Server::part(const int& fd)
 	if (getClient(fd)->getChannel().empty())
 		return;
 	getChannel(getClient(fd)->getChannel())->deleteClient(fd);
-	getClient(fd)->setAdmin(false);
 }
 
 void	Server::handleCmd(const int& fd, const std::vector<std::string>& input)
