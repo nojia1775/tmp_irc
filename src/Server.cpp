@@ -133,11 +133,24 @@ void	Server::quit(const int& fd)
 
 void	Server::join(const int& fd, const std::vector<std::string>& input)
 {
-	(void)input;
 	if (getClient(fd)->isAllowed() == false)
 	{
-		std::cout << "You have to enter the password first";
+		std::cout << "You have to enter the password first" << std::endl;
 		return;
+	}
+	if (input.size() == 1)
+		return;
+	if (getChannel(input[1]) == _channels.end())
+	{
+		getClient(fd)->setChannel(input[1]);
+		_channels.push_back(Channel(*getClient(fd), input[1]));
+		std::cout << "Channel " << input[1] << " created!" << std::endl;
+	}
+	else
+	{
+		getClient(fd)->setChannel(input[1]);
+		getChannel(input[1])->join(*getClient(fd));
+		std::cout << "Connected to channel " << input[1] << "!" << std::endl;
 	}
 }
 
@@ -183,7 +196,10 @@ int Server::ParseData(int fd, char *buff)
 	if (buff[0] == '/')
 		handleCmd(fd, splitInput(buff));
 	else
+	{
+		send(fd, constructMessage(fd, buff), strlen(constructMessage(fd, buff)), 0);
 		broadcastToChannel(fd, constructMessage(fd, buff));
+	}
 	return (0);
 }
 

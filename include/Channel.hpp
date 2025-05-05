@@ -16,7 +16,7 @@
 #include <cctype>
 #include <cstring>
 #include <cstdlib>
-#include "Clients.hpp"
+#include "Client.hpp"
 #include "Colors.h"
 #include "tools.hpp"
 
@@ -41,4 +41,5 @@ class	Channel
 		void			setName(const std::string& name) { _name = name; }
 
 		void			sendMessage(const char *message) const;
+		void			join(Client& client);
 };

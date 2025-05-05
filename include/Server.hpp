@@ -15,7 +15,7 @@
 #include <poll.h>
 #include <cctype>
 #include <cstdlib>
-#include "Clients.hpp"
+#include "Client.hpp"
 #include "Colors.h"
 #include "Channel.hpp"
 
