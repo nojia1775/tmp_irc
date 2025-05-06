@@ -16,6 +16,7 @@ class Client
 
 	public:
 					Client(const int& fd, const in_addr& sin_addr) : connected(false), _admin(false), Fd(fd), IPadd(inet_ntoa(sin_addr)), _allowed(false) {}
+					~Client(void) {}
 
 		const int& 		getFd(void) const { return Fd; }
 		const std::string&	getNick(void) const { return _nick; }
